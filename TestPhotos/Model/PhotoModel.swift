@@ -9,7 +9,7 @@
 import Foundation
 import RealmSwift
 
-public class PhotoModel: Object {
+public class PhotoModel: Object, Decodable {
   
   @objc
   private dynamic var id: String = ""
@@ -35,5 +35,13 @@ public class PhotoModel: Object {
     self.height = height
     self.url = url
   }
+  
+  enum CodingKeys: String, CodingKey {
+    case id
+    case author
+    case width
+    case height
+    case url = "download_url"
+   }
   
 }
