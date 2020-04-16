@@ -54,7 +54,6 @@ public class PhotosViewModel: ViewModel {
   
   /// Загрузка данных из сети и сохранение их в БД
   public func loadDataFromNetwork() {
-    self.isLoading.value = true
     let page: Int = self.pageToBeLoaded
     let limit: Int = self.numberOfPhotosToBeLoaded
 
@@ -70,6 +69,7 @@ public class PhotosViewModel: ViewModel {
       return
     }
     self.photos = Array(data)
+    self.cellModels.value = self.viewModels()
   }
   
   /// Открытие детального экрана для просмотра фото
@@ -129,6 +129,7 @@ public class PhotosViewModel: ViewModel {
   }
   
   private func getEnoughData(page: Int, limit: Int) {
+    self.isLoading.value = true
     self.loadData(page: page, limit: limit) { response in
       
       switch response {
@@ -183,6 +184,10 @@ public class PhotosViewModel: ViewModel {
         }
       case .failure(let error):
         self.error.value = error
+        self.isLoading.value = false
+        DispatchQueue.main.async {
+          self.loadDataFromDatabase()
+        }
       }
     }
   }
