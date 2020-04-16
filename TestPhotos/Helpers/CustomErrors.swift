@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// Ошибка базы данных
 enum DatabaseError: Error {
   case loadDataError
 }
@@ -21,19 +22,8 @@ extension DatabaseError: LocalizedError {
   }
 }
 
-enum UserDefaultsError: Error {
-  case loadDataError
-}
 
-extension UserDefaultsError: LocalizedError {
-  public var errorDescription: String? {
-    switch self {
-    case .loadDataError:
-      return "Ошибка в загрузке данных из UserDefaults"
-    }
-  }
-}
-
+/// Неопределенная ошибка
 enum UndefinedError: Error {
   case undefined
 }

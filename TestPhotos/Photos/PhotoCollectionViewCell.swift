@@ -15,6 +15,7 @@ class PhotoCollectionViewCell: UICollectionViewCell {
   
   private var imageView: UIImageView?
   
+  /// Замыкание при долгом нажатии на ячейку
   public var actionOnLongPress: (() -> Void)?
   
   // MARK: - Init
@@ -43,6 +44,9 @@ class PhotoCollectionViewCell: UICollectionViewCell {
   
   private func configureUI() {
     self.addImageView()
+    let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self,
+                                                                  action: #selector(didLongPressGesture))
+    self.addGestureRecognizer(longPressGestureRecognizer)
   }
   
   private func addImageView() {
@@ -61,4 +65,8 @@ class PhotoCollectionViewCell: UICollectionViewCell {
         ])
   }
   
+  @objc
+  private func didLongPressGesture() {
+    self.actionOnLongPress?()
+  }
 }

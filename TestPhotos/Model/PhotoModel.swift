@@ -9,18 +9,21 @@
 import Foundation
 import RealmSwift
 
+/// Модель фото для хранения в БД
 public class PhotoModel: Object, Decodable {
   
   @objc
   public dynamic var id: String = ""
   @objc
-  private dynamic var author: String = ""
+  public dynamic var author: String = ""
   @objc
-  private dynamic var width: Int = 0
+  public dynamic var width: Int = 0
   @objc
-  private dynamic var height: Int = 0
+  public dynamic var height: Int = 0
   @objc
   public dynamic var url: String = ""
+  @objc
+  public dynamic var isDeleted: Bool = false
   
   
   override public static func primaryKey() -> String? {
@@ -44,4 +47,12 @@ public class PhotoModel: Object, Decodable {
     case url = "download_url"
    }
   
+}
+
+extension PhotoModel {
+  /// Сравнение двух объектов типа вместо реализации по умолчанию NSObject
+  /// - Parameter object: объект для сравнения
+  override public func isEqual(_ object: Any?) -> Bool {
+    return self.id == (object as? PhotoModel)?.id
+  }
 }

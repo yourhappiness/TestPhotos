@@ -11,19 +11,16 @@ import RxSwift
 
 class PhotosViewController: UIViewController {
   
+  // MARK: - Properties
   private let disposeBag = DisposeBag()
   
   private var collectionView: UICollectionView?
+  private let itemMargin: CGFloat = 20
   
-  private let viewModel: PhotosViewModel
+  private let viewModel: ViewModel
   private var photoCellModels: [PhotoCellModel] = []
-//    didSet {
-//      DispatchQueue.main.async {
-//        self.collectionView?.reloadData()
-//      }
-//    }
-//  }
   
+  // MARK: - Init
   init(viewModel: PhotosViewModel) {
     self.viewModel = viewModel
     super.init(nibName: nil, bundle: nil)
@@ -32,6 +29,8 @@ class PhotosViewController: UIViewController {
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
+  
+  // MARK: - Methods
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -47,7 +46,7 @@ class PhotosViewController: UIViewController {
   
   private func configureUI() {
     let collectionViewLayout = UICollectionViewFlowLayout()
-    let itemWidth = (self.view.frame.width - 2) / 2
+    let itemWidth = (self.view.frame.width - self.itemMargin) / 2
     collectionViewLayout.estimatedItemSize = CGSize(width: itemWidth, height: itemWidth)
     collectionViewLayout.minimumInteritemSpacing = 1
     collectionViewLayout.minimumLineSpacing = 1
@@ -129,7 +128,18 @@ extension PhotosViewController: UICollectionViewDelegate, UICollectionViewDataSo
   }
   
   private func didLongPressOnCell(at indexPath: IndexPath){
-    self.viewModel.didLongPressOnPhoto(indexPath: indexPath)
+    guard !(self.presentedViewController is UIAlertController) else {return}
+    let message = "Вы действительно хотите удалить фотографию?\nОтмена действия невозможна"
+    let alertVC = UIAlertController(title: "Удаление фото",
+                                    message: message,
+                                    preferredStyle: .actionSheet)
+    let deleteAction = UIAlertAction(title: "Да", style: .destructive) { _ in
+      self.viewModel.didLongPressOnPhoto(indexPath: indexPath)
+    }
+    let dismissAction = UIAlertAction(title: "Нет", style: .destructive)
+    alertVC.addAction(deleteAction)
+    alertVC.addAction(dismissAction)
+    self.present(alertVC, animated: true, completion: nil)
   }
 }
 

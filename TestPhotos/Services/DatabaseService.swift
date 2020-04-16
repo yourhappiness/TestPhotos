@@ -15,7 +15,9 @@ protocol DatabaseServiceProtocol {
   
   func loadData <T: Object> (type: T.Type) -> Results<T>?
   
-  func deleteData <T: Object> (_ data: [T])
+  func loadData <T: Object> (type: T.Type, isDeleted: Bool) -> Results<T>?
+  
+  func loadData <T: Object> (type: T.Type, id: String) -> Results<T>?
   
 }
 
@@ -56,17 +58,20 @@ public class DatabaseService: DatabaseServiceProtocol {
   ///
   /// - Returns: результат запроса к базе
   public func loadData <T: Object> (type: T.Type) -> Results<T>? {
-    return self.realm?.objects(type)
+    return self.realm?.objects(type).filter("isUserGroup = %@", true)
   }
   
-  /// Удаляет данные из базы
+  /// Загружает данные из базы c признаком isDeleted
   ///
-  /// - Parameter data: данные для удаления
-  public func deleteData <T: Object> (_ data: [T]) {
-    DispatchQueue.main.async {
-      try? self.realm?.write {
-        self.realm?.delete(data)
-      }
-    }
+  /// - Returns: результат запроса к базе
+  public func loadData <T: Object> (type: T.Type, isDeleted: Bool) -> Results<T>? {
+    return self.realm?.objects(type).filter("isDeleted = %@", isDeleted)
+  }
+  
+  /// Загружает данные из базы по первичному ключу
+  ///
+  /// - Returns: результат запроса к базе
+  public func loadData <T: Object> (type: T.Type, id: String) -> Results<T>? {
+    return self.realm?.objects(type).filter("id = %@", id)
   }
 }
