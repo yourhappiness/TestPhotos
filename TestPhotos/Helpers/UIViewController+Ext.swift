@@ -8,15 +8,14 @@
 
 import UIKit
 
-// MARK: - Показывает alertVC с нужным текстом
-public extension UIViewController {
-  func showAlert(title: String, message: String) {
-    let alertVC = UIAlertController(
-      title: title,
-      message: message,
-      preferredStyle: .alert)
-    let okAction = UIAlertAction(title: "ОК", style: .destructive, handler: nil)
-    alertVC.addAction(okAction)
-    self.present(alertVC, animated: true, completion: nil)
-  }
+//Показ модального окна с ошибкой
+extension UIViewController {
+    func showAlert(error: Error) {
+      DispatchQueue.main.async {
+        let alertVC = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+        
+        alertVC.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+        self.present(alertVC, animated: true, completion: nil)
+      }
+    }
 }
