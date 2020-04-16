@@ -9,6 +9,9 @@
 import Foundation
 //import RxSwift
 import Alamofire
+import Kingfisher
+
+
 
 public class PhotosViewModel {
   
@@ -39,18 +42,15 @@ public class PhotosViewModel {
     self.loadDataFromNetwork()
   }
   
-  // MARK: - ViewModel methods\
+  // MARK: - ViewModel methods
   
+  /// Загрузка данных из сети и сохранение их в БД
   public func loadDataFromNetwork() {
     let page: Int = self.pageToBeLoaded
-    var photosCount: Int = self.numberOfPhotosToBeLoaded
-    
-    if self.photos.count > 0 {
-      photosCount = self.numberOfPhotosToBeLoaded - self.photos.count
-    }
-    
+    let limit: Int = self.numberOfPhotosToBeLoaded
+
     self.loadDeletedPhotos()
-    self.getEnoughData(page: page, limit: photosCount)
+    self.getEnoughData(page: page, limit: limit)
   }
   
   /// Загрузка данных из базы данных
@@ -62,10 +62,29 @@ public class PhotosViewModel {
     self.photos = Array(data)
   }
   
+  /// Открытие детального экрана для просмотра фото
+  /// - Parameter index: индекс необходимого фото в массиве
+  internal func didTapOnPhoto(index: Int) {
+    let photoStringURL: String = self.photos[index].url
+    guard let photoURL: URL = URL(string: photoStringURL) else {return}
+    KingfisherManager.shared.retrieveImage(with: photoURL, options: nil, progressBlock: nil) { [weak self] response in
+      switch response {
+      case .success(let result):
+        let image = result.image
+        let detailedPhotoVC = DetailedPhotoViewController(image: image, nibName: nil, bundle: nil)
+        detailedPhotoVC.modalPresentationStyle = .overFullScreen
+        self?.viewController?.present(detailedPhotoVC, animated: true, completion: nil)
+        return
+      case .failure(let error):
+        self?.error = error
+      }
+    }
+  }
+  
   // MARK: - Private
   private func viewModels() -> [PhotoCellModel] {
       return self.photos.compactMap { photoModel -> PhotoCellModel in
-        return PhotoCellModel(photoURL: photoModel.url)
+        return PhotoCellModel(id: photoModel.id, photoURL: photoModel.url)
       }
   }
   
@@ -143,4 +162,9 @@ public class PhotosViewModel {
     }
     self.deletedPhotos = deletedPhotos
   }
+  
+  private func photo(with viewModel: PhotoCellModel) -> PhotoModel? {
+      return self.photos.first { viewModel.id == $0.id }
+  }
+
 }

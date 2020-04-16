@@ -10,5 +10,6 @@ import UIKit
 
 /// Модель для отображения данных в ячейке
 struct PhotoCellModel {
+  public let id: String
   public let photoURL: String
 }
