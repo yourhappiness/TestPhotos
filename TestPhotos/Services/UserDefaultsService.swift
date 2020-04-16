@@ -16,7 +16,7 @@ public class UserDefaultsService {
   
   /// Сохранение id  удаленного фото в UserDefaults
   /// - Parameter photoId: id фото
-  public func save(photoId: String) {
+  public func saveDeleted(photoId: String) {
     var deletedPhotosArray: [String]? = self.getDeletedPhotos()
     if deletedPhotosArray == nil {
       deletedPhotosArray = []
@@ -27,7 +27,10 @@ public class UserDefaultsService {
   
   /// Получение массива данных из UserDefaults
   public func getDeletedPhotos() -> [String]? {
-    return self.userDefaults.array(forKey: self.key) as? [String]
+    guard let deletedPhotos = self.userDefaults.array(forKey: self.key) as? [String] else {
+      return []
+    }
+    return deletedPhotos
   }
   
 }

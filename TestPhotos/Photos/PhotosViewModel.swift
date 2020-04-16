@@ -7,7 +7,7 @@
 //
 
 import Foundation
-//import RxSwift
+import RxSwift
 import Alamofire
 import Kingfisher
 
@@ -16,8 +16,8 @@ import Kingfisher
 public class PhotosViewModel {
   
   // MARK: - Observable properties
-  internal var cellModels: [PhotoCellModel] = []
-  internal var error: Error?
+  internal var cellModels: Variable<[PhotoCellModel]> = Variable([])
+  internal var error: Variable<Error?> = Variable(nil)
   
   // MARK: - Properties
   weak var viewController: UIViewController?
@@ -56,7 +56,7 @@ public class PhotosViewModel {
   /// Загрузка данных из базы данных
   public func loadDataFromDatabase() {
     guard let data = self.databaseService.loadData(type: PhotoModel.self) else {
-      self.error = DatabaseError.loadDataError
+      self.error.value = DatabaseError.loadDataError
       return
     }
     self.photos = Array(data)
@@ -64,7 +64,7 @@ public class PhotosViewModel {
   
   /// Открытие детального экрана для просмотра фото
   /// - Parameter index: индекс необходимого фото в массиве
-  internal func didTapOnPhoto(index: Int) {
+  public func didTapOnPhoto(index: Int) {
     let photoStringURL: String = self.photos[index].url
     guard let photoURL: URL = URL(string: photoStringURL) else {return}
     KingfisherManager.shared.retrieveImage(with: photoURL, options: nil, progressBlock: nil) { [weak self] response in
@@ -72,20 +72,31 @@ public class PhotosViewModel {
       case .success(let result):
         let image = result.image
         let detailedPhotoVC = DetailedPhotoViewController(image: image, nibName: nil, bundle: nil)
+        detailedPhotoVC.view.backgroundColor = .black
         detailedPhotoVC.modalPresentationStyle = .overFullScreen
         self?.viewController?.present(detailedPhotoVC, animated: true, completion: nil)
         return
       case .failure(let error):
-        self?.error = error
+        self?.error.value = error
       }
     }
   }
   
+  /// Обработка долгого нажатия на ячейку
+  /// - Parameter indexPath: индекс нажатой ячейки
+  public func didLongPressOnPhoto(indexPath: IndexPath) {
+    let index = indexPath.item
+    let photo = self.photos[index]
+    self.databaseService.deleteData([photo])
+    self.userDefaultsService.saveDeleted(photoId: photo.id)
+    
+  }
+  
   // MARK: - Private
   private func viewModels() -> [PhotoCellModel] {
-      return self.photos.compactMap { photoModel -> PhotoCellModel in
-        return PhotoCellModel(id: photoModel.id, photoURL: photoModel.url)
-      }
+    return self.photos.compactMap { photoModel -> PhotoCellModel in
+      return PhotoCellModel(id: photoModel.id, photoURL: photoModel.url)
+    }
   }
   
   private func loadData(page: Int,
@@ -127,7 +138,7 @@ public class PhotosViewModel {
             }
             
             guard let index: Int = photos.firstIndex(of: photo) else {
-              self.error = UndefinedError.undefined
+              self.error.value = UndefinedError.undefined
               return
             }
             
@@ -138,9 +149,9 @@ public class PhotosViewModel {
                 self.databaseService.saveData(self.photos, update: true)
               }
               
-              self.cellModels = self.viewModels()
+              self.cellModels.value = self.viewModels()
               
-              if self.cellModels.count < self.numberOfPhotosToBeLoaded {
+              if self.cellModels.value.count < self.numberOfPhotosToBeLoaded {
                 self.getEnoughData(page: page + 1, limit: limit)
               }
               return
@@ -150,14 +161,14 @@ public class PhotosViewModel {
         }
         
       case .failure(let error):
-        self.error = error
+        self.error.value = error
       }
     }
   }
   
   private func loadDeletedPhotos() {
     guard let deletedPhotos = self.userDefaultsService.getDeletedPhotos() else {
-      self.error = UserDefaultsError.loadDataError
+      self.error.value = UserDefaultsError.loadDataError
       return
     }
     self.deletedPhotos = deletedPhotos
