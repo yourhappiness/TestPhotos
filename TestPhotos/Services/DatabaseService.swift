@@ -39,14 +39,16 @@ public class DatabaseService: DatabaseServiceProtocol {
   ///
   /// - Parameter data: данные для сохранения
   public func saveData <T: Object> (_ data: [T], update: Bool = false) {
-    let updatePolicy: Realm.UpdatePolicy
-    if update {
-      updatePolicy = .modified
-    } else {
-      updatePolicy = .error
-    }
-    try? self.realm?.write {
-      self.realm?.add(data, update: updatePolicy)
+    DispatchQueue.main.async {
+      let updatePolicy: Realm.UpdatePolicy
+      if update {
+        updatePolicy = .modified
+      } else {
+        updatePolicy = .error
+      }
+      try? self.realm?.write {
+        self.realm?.add(data, update: updatePolicy)
+      }
     }
   }
   
@@ -61,8 +63,10 @@ public class DatabaseService: DatabaseServiceProtocol {
   ///
   /// - Parameter data: данные для удаления
   public func deleteData <T: Object> (_ data: [T]) {
-    try? self.realm?.write {
-      self.realm?.delete(data)
+    DispatchQueue.main.async {
+      try? self.realm?.write {
+        self.realm?.delete(data)
+      }
     }
   }
 }

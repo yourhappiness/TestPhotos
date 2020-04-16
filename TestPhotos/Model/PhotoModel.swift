@@ -12,7 +12,7 @@ import RealmSwift
 public class PhotoModel: Object, Decodable {
   
   @objc
-  private dynamic var id: String = ""
+  public dynamic var id: String = ""
   @objc
   private dynamic var author: String = ""
   @objc
@@ -20,7 +20,7 @@ public class PhotoModel: Object, Decodable {
   @objc
   private dynamic var height: Int = 0
   @objc
-  private dynamic var url: String = ""
+  public dynamic var url: String = ""
   
   
   override public static func primaryKey() -> String? {
