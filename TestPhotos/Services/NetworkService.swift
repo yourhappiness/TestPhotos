@@ -11,8 +11,9 @@ import Alamofire
 
 protocol NetworkServiceProtocol {
   
-  func loadData<T : Decodable>(parameters: Parameters,
-                               completion: @escaping (Result<T, Error>) -> Void)
+  func loadData<T : Decodable>(type: [T.Type],
+                               parameters: Parameters,
+                               completion: @escaping (Result<[T], Error>) -> Void)
     
 }
 
@@ -30,8 +31,9 @@ public class NetworkService: NetworkServiceProtocol {
   ///   - page: номер страницы, по умолчанию 1
   ///   - limit: количество фотографий, по умолчанию 25
   ///   - completion: результат запроса
-  public func loadData<T : Decodable>(parameters: Parameters,
-                                      completion: @escaping (Result<T, Error>) -> Void) {
+  public func loadData<T : Decodable>(type: [T.Type],
+                                      parameters: Parameters,
+                                      completion: @escaping (Result<[T], Error>) -> Void) {
     
     AF.request(baseURL, method: .get, parameters: parameters)
       .validate()
@@ -39,7 +41,7 @@ public class NetworkService: NetworkServiceProtocol {
       switch response.result {
       case .success(let data):
         do {
-          let result = try JSONDecoder().decode(T.self, from: data)
+          let result = try JSONDecoder().decode([T].self, from: data)
           completion(.success(result))
         } catch {
           completion(.failure(error))
